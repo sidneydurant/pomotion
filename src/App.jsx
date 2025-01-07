@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import startIcon from '../start-icon.png';
 
-const workInterval = 25 * 60;
-const breakInterval = 5 * 60;
+const workInterval = window.location.href === "http://localhost:5173/" ? 6 : 25 * 60;
+const breakInterval = window.location.href === "http://localhost:5173/" ? 3 : 5 * 60;
 
 const PomodoroTimer = () => {
   const [time, setTime] = useState(-workInterval);
@@ -99,8 +99,7 @@ const PomodoroTimer = () => {
   // }
 
   return (
-      <div className="text-slate-600">
-        {/* Timer and Controls Container */}
+      <div className="px-8 text-slate-600">
         <div className="flex gap-4">
 
           {/* Controls */}
