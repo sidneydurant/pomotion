@@ -116,7 +116,7 @@ const PomodoroTimer = () => {
     switchMode();
     setIsRunning(false);
     newNotification.close();
-    window.focus();
+    window.focus();g
   }
 
   return (
@@ -131,12 +131,14 @@ const PomodoroTimer = () => {
           {/* Controls */}
           <span className="flex gap-2">
             {/* Reset button */}
+            {(isRunning && time <= 0) &&
             <button
               className="px-4 py-2 rounded-lg bg-gray-500 hover:bg-gray-600 text-white"
               onClick={handleReset}
             >
               ↺
             </button>
+            }
 
             {/* Play button */}
             {(!isRunning) &&
