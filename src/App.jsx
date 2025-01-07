@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import startIcon from '../start-icon.png';
 
-const workInterval = window.location.href === "http://localhost:5173/" ? 6 : 25 * 60;
-const breakInterval = window.location.href === "http://localhost:5173/" ? 3 : 5 * 60;
+const debugMode = window.location.href === "http://localhost:5173/";
+const workInterval = debugMode ? 6 : 25 * 60;
+const breakInterval = debugMode ? 3 : 5 * 60;
 
 const PomodoroTimer = () => {
   const [time, setTime] = useState(-workInterval);
   const [isRunning, setIsRunning] = useState(false);
   const [isWorkTime, setIsWorkTime] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   // Check for notification permissions on mount
   useEffect(() => {
@@ -25,7 +27,6 @@ const PomodoroTimer = () => {
     if (isRunning) {
       timer = setInterval(() => {
         setTime(prev => prev + 1);
-        console.log("stuff");
       }, 1000);
       // TODO: set an 'original time' and set the timeout to the
       // amount of time until the next second, (not always 1000)
@@ -48,7 +49,11 @@ const PomodoroTimer = () => {
   const notifyUser = () => {
     
     if (notificationsEnabled) {
-      const mainNotification = new Notification(
+      if (notification) {
+        notification.close();
+      }
+
+      const newNotification = new Notification(
         isWorkTime ? "Work Time Complete!" : "Break Time Complete!", 
         {
           body: isWorkTime ? 
@@ -59,64 +64,62 @@ const PomodoroTimer = () => {
         }
       );
 
-      mainNotification.onclick = () => {
+      // if user clicks the notification, bring them to the tab, reset timer (?)
+      newNotification.onclick = () => {
+        if (debugMode) console.log("onclick called");
         switchMode();
-        mainNotification.close();
-        window.focus(); // TODO: do I really want to refocus the tab? Maybe only do this if isWorkTime?
+        setIsRunning(false);
+        newNotification.close();
+        window.focus();
       };
+
+      // if user clicks "x" to close notification, let them continue
+      newNotification.onclose = () => {
+        if (debugMode) console.log("onclose called");
+        newNotification.close();
+      };
+
+      // TODO: add and then remove event listener when needed
+      // would like to clear out stale notifications, and need to remove event listeners
+      // document.addEventListener("visibilitychange", () => {
+      //   if (document.visibilityState === "visible" && newNotification) {
+      //     // The tab has become visible so clear the now-stale Notification.
+      //     n.close();
+      //   }
+      // });
+
+      setNotification(newNotification);
     }
   };
 
   const switchMode = () => {
     setIsWorkTime(prev => !prev);
     setTime(isWorkTime ? -breakInterval : -workInterval);
-    setIsRunning(true);
   };
 
-  const resetTimer = () => {
+  const handlePlay = () => {
+    setIsRunning(!isRunning);
+  }
+
+  const handleReset = () => {
     // we always go to work mode when resetting
     setIsWorkTime(true);
     setTime(-workInterval);
     setIsRunning(false);
-  };
-
-  const handlePlayPause = () => {
-    toggleTimer();
+    notification.close();
   }
-
-  const handleReset = () => {
-    resetTimer();
-  }
-
-  const toggleTimer = () => {
-    setIsRunning(!isRunning);
-  };
-
-  // const getNotificationPermissions = () => {
-  //   Notification.requestPermission().then(permission => {
-  //     setNotificationsEnabled(permission === "granted");
-  //   });
-  // }
 
   return (
       <div className="px-8 text-slate-600">
         <div className="flex gap-4">
 
+          {/* Timer Display */}
+          <span className="text-5xl font-mono font-bold">
+            {formatTime(time)}
+          </span>
+
           {/* Controls */}
           <span className="flex gap-2">
-
-            {/* Play/Pause button */}
-            <button
-              className={`px-4 py-2 rounded-lg ${
-                isRunning 
-                ? "bg-red-500 hover:bg-red-600" 
-                : "bg-green-500 hover:bg-green-600"
-              } text-white`}
-              onClick={handlePlayPause}
-            >
-              {isRunning ? "⏸" : "▶"}
-            </button>
-
             {/* Reset button */}
             <button
               className="px-4 py-2 rounded-lg bg-gray-500 hover:bg-gray-600 text-white"
@@ -124,13 +127,26 @@ const PomodoroTimer = () => {
             >
               ↺
             </button>
-          </span>
 
-          {/* Timer Display */}
-          <span className="text-5xl font-mono font-bold">
-            {formatTime(time)}
+            {/* Play button */}
+            {(!isRunning) &&
+            <button
+              className={`px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white`}
+              onClick={handlePlay}
+            >
+              ▶
+            </button>
+            }
           </span>
         </div>
+        {debugMode && (
+          <div>
+            <div>time: {time}</div>
+            <div>isRunning: {isRunning.toString()}</div>
+            <div>isWorkTime: {isWorkTime.toString()}</div>
+            <div>notificationsEnabled: {notificationsEnabled.toString()}</div>
+          </div>
+        )}
       </div>
   );
 };
