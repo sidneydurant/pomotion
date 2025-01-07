@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import startIcon from '../start-icon.png';
 
-const workInterval = 6;
-const breakInterval = 3;
+const workInterval = 25 * 60;
+const breakInterval = 5 * 60;
 
 const PomodoroTimer = () => {
   const [time, setTime] = useState(-workInterval);
@@ -30,8 +30,9 @@ const PomodoroTimer = () => {
       // TODO: set an 'original time' and set the timeout to the
       // amount of time until the next second, (not always 1000)
       // Over a long running timer, the current logic will drift
-    } else if (time === 0) {
-      handleTimerComplete();
+    }
+    if (time === 0) {
+      notifyUser();
     }
     return () => clearInterval(timer);
   }, [isRunning, time]);
@@ -44,11 +45,9 @@ const PomodoroTimer = () => {
     return `${plus}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleTimerComplete = () => {
-    setIsRunning(false);
+  const notifyUser = () => {
     
     if (notificationsEnabled) {
-      // Main completion notification
       const mainNotification = new Notification(
         isWorkTime ? "Work Time Complete!" : "Break Time Complete!", 
         {
@@ -75,7 +74,9 @@ const PomodoroTimer = () => {
   };
 
   const resetTimer = () => {
-    setTime(isWorkTime ? -workInterval : -breakInterval);
+    // we always go to work mode when resetting
+    setIsWorkTime(true);
+    setTime(-workInterval);
     setIsRunning(false);
   };
 
