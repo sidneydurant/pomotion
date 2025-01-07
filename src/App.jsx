@@ -97,16 +97,26 @@ const PomodoroTimer = () => {
     setTime(isWorkTime ? -breakInterval : -workInterval);
   };
 
-  const handlePlay = () => {
-    setIsRunning(!isRunning);
-  }
-
+  // ↺
   const handleReset = () => {
-    // we always go to work mode when resetting
+    // we always go to work mode when resetting ???
     setIsWorkTime(true);
     setTime(-workInterval);
     setIsRunning(false);
     notification.close();
+  }
+  
+  // ▶
+  const handlePlay = () => {
+    setIsRunning(!isRunning);
+  }
+
+  // ⏭
+  const handleSkip = () => {
+    switchMode();
+    setIsRunning(false);
+    newNotification.close();
+    window.focus();
   }
 
   return (
@@ -135,6 +145,16 @@ const PomodoroTimer = () => {
               onClick={handlePlay}
             >
               ▶
+            </button>
+            }
+
+            {/* Skip button */}
+            {(isRunning && time > 0) &&
+            <button
+              className={`px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white`}
+              onClick={handleSkip}
+            >
+              ⏭
             </button>
             }
           </span>
