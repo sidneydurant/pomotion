@@ -110,7 +110,7 @@ const PomodoroTimer = () => {
   }
 
   return (
-      <div className="px-8 text-slate-600">
+      <div className="text-slate-600">
         <div className="flex gap-4">
 
           {/* Timer Display */}
